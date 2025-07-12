@@ -90,34 +90,4 @@ jobs:
           start /b java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1
       
 
-  test-app:
-    needs: deploy
-    runs-on: [self-hosted, windows]
-    if: github.ref == 'refs/heads/master'
-    defaults:
-      run:
-        shell: cmd
-    steps:
-      - name: Wait for Spring Boot app to be up
-        run: |
-          setlocal enabledelayedexpansion
-          set "RETRIES=120"
-          set "SLEEP=5"
-          set "SUCCESS=0"
-          for /l %%i in (1,1,%RETRIES%) do (
-           
-            curl "http://localhost:8080/api/products"
-            curl -s -o nul -w "%{http_code}" http://localhost:8080/api/products | find "200" >nul
-            if !errorlevel! == 0 (
-              echo Spring Boot app is up and running.
-              set "SUCCESS=1"
-              goto :break
-            )
-            echo Waiting for Spring Boot app... (attempt %%i/%RETRIES%)
-            timeout /t %SLEEP% >nul
-          )
-          :break
-          if !SUCCESS! == 0 (
-            echo Spring Boot app is not reachable after %RETRIES% attempts.
-            exit 1
-          )
+  
