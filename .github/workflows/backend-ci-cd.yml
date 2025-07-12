@@ -86,6 +86,10 @@ jobs:
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
           start /b java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1
+      - name: Wait for app to write logs
+        run: timeout /t 15
+      - name: Show Spring Boot app log
+        run: type C:\Users\devops_agentic\Desktop\DeployApp\app.log
 
   test-app:
     needs: deploy
