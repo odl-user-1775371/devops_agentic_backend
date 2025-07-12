@@ -49,10 +49,24 @@ jobs:
         with:
           name: spring-boot-jar
           path: backend/target/*.jar
-      - name: Deployment Instructions
+
+  deploy:
+    needs: build
+    runs-on: [self-hosted, windows]
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - name: Download Spring Boot JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: spring-boot-jar
+          path: C:/Users/devops_agentic/Desktop/DeployApp
+      - name: Stop existing Spring Boot app
         run: |
-          echo "To deploy the application, download the JAR artifact from this workflow and copy it to C:\\Users\\devops_agentic\\Desktop\\DeployApp."
-          echo "Then run:"
-          echo "cd C:\\Users\\devops_agentic\\Desktop\\DeployApp"
-          echo "java -jar demo-0.0.1-SNAPSHOT.jar"
-          echo "This will start the Spring Boot application in the DeployApp folder."
+          Stop-Process -Name java -ErrorAction SilentlyContinue || echo "No running Java process found."
+        shell: pwsh
+      - name: Start Spring Boot app
+        run: |
+          cd C:/Users/devops_agentic/Desktop/DeployApp
+          $jar = Get-ChildItem -Filter *.jar | Select-Object -First 1
+          Start-Process java -ArgumentList "-jar $($jar.Name)" -NoNewWindow
+        shell: pwsh
