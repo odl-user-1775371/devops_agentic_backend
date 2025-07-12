@@ -1,0 +1,60 @@
+name: Backend CI/CD
+
+on:
+  push:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci-cd.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+      - name: Build with Maven
+        run: mvn clean install
+      - name: Archive build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maven-logs
+          path: backend/target/surefire-reports/*.txt
+      - name: Archive full Maven log
+        if: always()
+        run: |
+          cp $GITHUB_WORKSPACE/backend/target/surefire-reports/*.txt $GITHUB_WORKSPACE/backend/maven.log || true
+        continue-on-error: true
+      - name: Upload full Maven log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: full-maven-log
+          path: backend/maven.log
+      - name: Show Maven log
+        if: always()
+        run: |
+          cat $GITHUB_WORKSPACE/backend/maven.log || echo 'No log found.'
+      - name: Upload Spring Boot JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-boot-jar
+          path: backend/target/*.jar
+      - name: Deployment Instructions
+        run: |
+          echo "To deploy the application, download the JAR artifact from this workflow and copy it to C:\\Users\\devops_agentic\\Desktop\\DeployApp."
+          echo "Then run:"
+          echo "cd C:\\Users\\devops_agentic\\Desktop\\DeployApp"
+          echo "java -jar demo-0.0.1-SNAPSHOT.jar"
+          echo "This will start the Spring Boot application in the DeployApp folder."
