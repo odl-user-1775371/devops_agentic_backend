@@ -20,6 +20,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
+      - name: Cache Maven packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-
       - name: Build with Maven
         run: mvn clean install
       - name: Archive build logs
@@ -30,9 +37,13 @@ jobs:
           path: backend/target/surefire-reports/*.txt
       - name: Archive full Maven log
         if: always()
+        shell: pwsh
         run: |
-          cp backend/target/surefire-reports/*.txt backend/maven.log || true
-        continue-on-error: true
+          try {
+            Copy-Item backend/target/surefire-reports/*.txt backend/maven.log -ErrorAction Stop
+          } catch {
+            Write-Host 'No test logs found, skipping.'
+          }
       - name: Upload full Maven log
         if: always()
         uses: actions/upload-artifact@v4
