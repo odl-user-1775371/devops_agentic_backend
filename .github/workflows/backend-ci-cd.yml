@@ -80,7 +80,8 @@ jobs:
           path: C:/Users/devops_agentic/Desktop/DeployApp
       - name: Stop existing Spring Boot app
         run: |
-          for /f "tokens=2" %%a in ('tasklist ^| findstr java.exe') do taskkill /F /PID %%a || echo No running Java process found or stopped.
+          for /f "tokens=2" %%a in ('tasklist ^| findstr java.exe') do taskkill /F /PID %%a
+          if %ERRORLEVEL% NEQ 0 echo No running Java process found or stopped. & exit /b 0
       - name: Start Spring Boot app
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
