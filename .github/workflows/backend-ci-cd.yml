@@ -79,10 +79,12 @@ jobs:
           name: demo-0.0.1-SNAPSHOT
           path: C:/Users/devops_agentic/Desktop/DeployApp
       - name: Stop existing Spring Boot app
+        shell: cmd
         run: |
           for /f "tokens=2" %%a in ('tasklist ^| findstr java.exe') do taskkill /F /PID %%a
           if %ERRORLEVEL% NEQ 0 echo No running Java process found or stopped. & exit /b 0
       - name: Start Spring Boot app
+        shell: cmd
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
           start /b java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1
@@ -90,6 +92,7 @@ jobs:
         shell: cmd
         run: timeout /t 15
       - name: Show Spring Boot app log
+        shell: cmd
         run: type C:\Users\devops_agentic\Desktop\DeployApp\app.log
 
   test-app:
