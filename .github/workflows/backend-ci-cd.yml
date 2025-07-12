@@ -105,7 +105,7 @@ jobs:
           set "SLEEP=5"
           set "SUCCESS=0"
           for /l %%i in (1,1,%RETRIES%) do (
-            curl -s -o nul -w "%%{{http_code}}" http://localhost:8080/actuator/health | find "200" >nul
+            curl -s -o nul -w "%{http_code}" http://localhost:8080/actuator/health | find "200" >nul
             if !errorlevel! == 0 (
               echo Spring Boot app is up and running.
               set "SUCCESS=1"
