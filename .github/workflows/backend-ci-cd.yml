@@ -85,7 +85,7 @@ jobs:
       - name: Start Spring Boot app
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
-          start /b java -jar demo-0.0.1-SNAPSHOT.jar
+          start /b java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1
 
   test-app:
     needs: deploy
@@ -95,7 +95,24 @@ jobs:
       run:
         shell: cmd
     steps:
-      - name: Test if Spring Boot app is running
+      - name: Wait for Spring Boot app to be up
         run: |
-          timeout /t 10
-          curl -s -o nul -w "%{{http_code}}" http://localhost:8080/actuator/health | find "200" >nul && echo Spring Boot app is up and running. || (echo Spring Boot app is not reachable. & exit 1)
+          setlocal enabledelayedexpansion
+          set "RETRIES=30"
+          set "SLEEP=2"
+          set "SUCCESS=0"
+          for /l %%i in (1,1,%RETRIES%) do (
+            curl -s -o nul -w "%%{{http_code}}" http://localhost:8080/actuator/health | find "200" >nul
+            if !errorlevel! == 0 (
+              echo Spring Boot app is up and running.
+              set "SUCCESS=1"
+              goto :break
+            )
+            echo Waiting for Spring Boot app... (attempt %%i/%RETRIES%)
+            timeout /t %SLEEP% >nul
+          )
+          :break
+          if !SUCCESS! == 0 (
+            echo Spring Boot app is not reachable after %RETRIES% attempts.
+            exit 1
+          )
