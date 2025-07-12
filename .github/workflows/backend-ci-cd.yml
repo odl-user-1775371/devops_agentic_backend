@@ -12,9 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -25,6 +22,7 @@ jobs:
           java-version: '21'
       - name: Build with Maven
         run: mvn clean install
+        working-directory: backend
       - name: Archive build logs
         if: always()
         uses: actions/upload-artifact@v4
@@ -34,7 +32,7 @@ jobs:
       - name: Archive full Maven log
         if: always()
         run: |
-          cp $GITHUB_WORKSPACE/backend/target/surefire-reports/*.txt $GITHUB_WORKSPACE/backend/maven.log || true
+          cp backend/target/surefire-reports/*.txt backend/maven.log || true
         continue-on-error: true
       - name: Upload full Maven log
         if: always()
@@ -45,7 +43,7 @@ jobs:
       - name: Show Maven log
         if: always()
         run: |
-          cat $GITHUB_WORKSPACE/backend/maven.log || echo 'No log found.'
+          cat backend/maven.log || echo 'No log found.'
       - name: Upload Spring Boot JAR
         uses: actions/upload-artifact@v4
         with:
