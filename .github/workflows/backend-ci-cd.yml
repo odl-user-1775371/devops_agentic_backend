@@ -88,12 +88,7 @@ jobs:
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
           start /b java -jar demo-0.0.1-SNAPSHOT.jar > app.log 2>&1
-      - name: Wait for app to write logs
-        shell: cmd
-        run: timeout /t 15
-      - name: Show Spring Boot app log
-        shell: cmd
-        run: type C:\Users\devops_agentic\Desktop\DeployApp\app.log
+      
 
   test-app:
     needs: deploy
@@ -106,8 +101,8 @@ jobs:
       - name: Wait for Spring Boot app to be up
         run: |
           setlocal enabledelayedexpansion
-          set "RETRIES=30"
-          set "SLEEP=2"
+          set "RETRIES=120"
+          set "SLEEP=5"
           set "SUCCESS=0"
           for /l %%i in (1,1,%RETRIES%) do (
             curl -s -o nul -w "%%{{http_code}}" http://localhost:8080/actuator/health | find "200" >nul
