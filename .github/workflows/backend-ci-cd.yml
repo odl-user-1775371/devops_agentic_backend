@@ -85,7 +85,16 @@ jobs:
       - name: Start Spring Boot app
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
-          for %%f in (*.jar) do start /b java -jar "%%f"
+          java -jar demo-0.0.1-SNAPSHOT.jar
+
+  test-app:
+    needs: deploy
+    runs-on: [self-hosted, windows]
+    if: github.ref == 'refs/heads/master'
+    defaults:
+      run:
+        shell: cmd
+    steps:
       - name: Test if Spring Boot app is running
         run: |
           timeout /t 10
