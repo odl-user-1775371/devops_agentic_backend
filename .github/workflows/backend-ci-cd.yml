@@ -37,7 +37,7 @@ jobs:
           path: backend/target/surefire-reports/*.txt
       - name: Archive full Maven log
         if: always()
-        shell: pwsh
+        shell: powershell
         run: |
           try {
             Copy-Item backend/target/surefire-reports/*.txt backend/maven.log -ErrorAction Stop
@@ -52,8 +52,13 @@ jobs:
           path: backend/maven.log
       - name: Show Maven log
         if: always()
+        shell: powershell
         run: |
-          cat backend/maven.log || echo 'No log found.'
+          if (Test-Path backend/maven.log) {
+            Get-Content backend/maven.log
+          } else {
+            Write-Host 'No log found.'
+          }
       - name: Upload Spring Boot JAR
         uses: actions/upload-artifact@v4
         with:
