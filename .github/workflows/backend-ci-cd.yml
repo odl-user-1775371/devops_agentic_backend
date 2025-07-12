@@ -40,7 +40,7 @@ jobs:
         shell: powershell
         run: |
           try {
-            Copy-Item backend/target/surefire-reports/*.txt backend/maven.log -ErrorAction Stop
+            Copy-Item ./target/surefire-reports/*.txt backend/maven.log -ErrorAction Stop
           } catch {
             Write-Host 'No test logs found, skipping.'
           }
@@ -49,39 +49,40 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: full-maven-log
-          path: backend/maven.log
+          path: ./maven.log
       - name: Show Maven log
         if: always()
         shell: powershell
         run: |
-          if (Test-Path backend/maven.log) {
-            Get-Content backend/maven.log
+          if (Test-Path ./maven.log) {
+            Get-Content ./maven.log
           } else {
             Write-Host 'No log found.'
           }
       - name: Upload Spring Boot JAR
         uses: actions/upload-artifact@v4
         with:
-          name: spring-boot-jar
-          path: backend/target/*.jar
+          name: demo-0.0.1-SNAPSHOT
+          path: ./target/*.jar
 
   deploy:
     needs: build
     runs-on: [self-hosted, windows]
     if: github.ref == 'refs/heads/master'
+    defaults:
+      run:
+        shell: powershell
     steps:
       - name: Download Spring Boot JAR
         uses: actions/download-artifact@v4
         with:
-          name: spring-boot-jar
+          name: demo-0.0.1-SNAPSHOT
           path: C:/Users/devops_agentic/Desktop/DeployApp
       - name: Stop existing Spring Boot app
         run: |
-          Stop-Process -Name java -ErrorAction SilentlyContinue || echo "No running Java process found."
-        shell: pwsh
+          Stop-Process -Name java -ErrorAction SilentlyContinue; Write-Host "No running Java process found or stopped."
       - name: Start Spring Boot app
         run: |
           cd C:/Users/devops_agentic/Desktop/DeployApp
           $jar = Get-ChildItem -Filter *.jar | Select-Object -First 1
           Start-Process java -ArgumentList "-jar $($jar.Name)" -NoNewWindow
-        shell: pwsh
