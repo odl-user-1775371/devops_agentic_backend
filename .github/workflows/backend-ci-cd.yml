@@ -85,7 +85,7 @@ jobs:
       - name: Start Spring Boot app
         run: |
           cd /d C:\Users\devops_agentic\Desktop\DeployApp
-          java -jar demo-0.0.1-SNAPSHOT.jar
+          start /b java -jar demo-0.0.1-SNAPSHOT.jar
 
   test-app:
     needs: deploy
