@@ -71,7 +71,7 @@ jobs:
     if: github.ref == 'refs/heads/master'
     defaults:
       run:
-        shell: powershell
+        shell: cmd
     steps:
       - name: Download Spring Boot JAR
         uses: actions/download-artifact@v4
@@ -80,9 +80,12 @@ jobs:
           path: C:/Users/devops_agentic/Desktop/DeployApp
       - name: Stop existing Spring Boot app
         run: |
-          Stop-Process -Name java -ErrorAction SilentlyContinue; Write-Host "No running Java process found or stopped."
+          for /f "tokens=2" %%a in ('tasklist ^| findstr java.exe') do taskkill /F /PID %%a || echo No running Java process found or stopped.
       - name: Start Spring Boot app
         run: |
-          cd C:/Users/devops_agentic/Desktop/DeployApp
-          $jar = Get-ChildItem -Filter *.jar | Select-Object -First 1
-          Start-Process java -ArgumentList "-jar $($jar.Name)" -NoNewWindow
+          cd /d C:\Users\devops_agentic\Desktop\DeployApp
+          for %%f in (*.jar) do start /b java -jar "%%f"
+      - name: Test if Spring Boot app is running
+        run: |
+          timeout /t 10
+          curl -s -o nul -w "%{{http_code}}" http://localhost:8080/actuator/health | find "200" >nul && echo Spring Boot app is up and running. || (echo Spring Boot app is not reachable. & exit 1)
