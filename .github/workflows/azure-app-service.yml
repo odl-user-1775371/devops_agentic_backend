@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Call Azure Function (power_automate_connector)
         run: |
-          curl -X POST -H "Content-Type: application/json" \
+          curl -v -X POST -H "Content-Type: application/json" \
             -d '{
               "repository": "${{ github.repository }}",
               "commit": "${{ github.sha }}"
