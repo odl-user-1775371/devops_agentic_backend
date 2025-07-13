@@ -1,0 +1,20 @@
+name: Call Power Automate Connector
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  call-power-automate-connector:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Azure Function (power_automate_connector)
+        run: |
+          curl -X POST -H "Content-Type: application/json" \
+            -d '{
+              "repository": "${{ github.repository }}",
+              "commit": "${{ github.sha }}"
+            }' \
+            https://agents-affggrfheabwf0cm.southindia-01.azurewebsites.net/api/power_automate
