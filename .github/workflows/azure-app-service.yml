@@ -1,20 +1,20 @@
-name: Call Power Automate Connector
+name: Trigger Orchestrator Agent on Pull Request
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
-  call-power-automate-connector:
+  call-azure-function:
     runs-on: ubuntu-latest
     steps:
-      - name: Call Azure Function (power_automate_connector)
+      - name: Call Orchestrator Agent Azure Function
+        env:
+          AZURE_FUNCTION_URL: ${{ secrets.ORCHESTRATOR_AGENT_URL }}
         run: |
-          curl -v -X POST -H "Content-Type: application/json" \
-            -d '{
-              "repository": "${{ github.repository }}",
-              "commit": "${{ github.sha }}"
-            }' \
-            https://agents-affggrfheabwf0cm.southindia-01.azurewebsites.net/api/power_automate
+          REPO_NAME=${{ github.repository }}
+          COMMIT_ID=${{ github.event.pull_request.head.sha }}
+          echo "Triggering orchestrator agent for repo: $REPO_NAME, commit: $COMMIT_ID"
+          curl -X POST "$AZURE_FUNCTION_URL" \
+            -H "Content-Type: application/json" \
+            -d '{"repository": "'$REPO_NAME'", "commit": "'$COMMIT_ID'"}'
