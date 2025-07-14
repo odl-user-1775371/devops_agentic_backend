@@ -8,6 +8,11 @@ jobs:
   call-azure-function:
     runs-on: ubuntu-latest
     steps:
+      - name: Log PR Info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Commit ID: ${{ github.event.pull_request.head.sha }}"
+
       - name: Call Orchestrator Agent Azure Function
         env:
           AZURE_FUNCTION_URL: ${{ secrets.ORCHESTRATOR_AGENT_URL }}
@@ -15,6 +20,10 @@ jobs:
           REPO_NAME=${{ github.repository }}
           COMMIT_ID=${{ github.event.pull_request.head.sha }}
           echo "Triggering orchestrator agent for repo: $REPO_NAME, commit: $COMMIT_ID"
-          curl -X POST "$AZURE_FUNCTION_URL" \
+          RESPONSE=$(curl -s -w '\n%{{http_code}}' -X POST "$AZURE_FUNCTION_URL" \
             -H "Content-Type: application/json" \
-            -d '{"repository": "'$REPO_NAME'", "commit": "'$COMMIT_ID'"}'
+            -d '{"repository": "'$REPO_NAME'", "commit": "'$COMMIT_ID'"}')
+          HTTP_BODY=$(echo "$RESPONSE" | head -n -1)
+          HTTP_STATUS=$(echo "$RESPONSE" | tail -n1)
+          echo "Orchestrator agent response status: $HTTP_STATUS"
+          echo "Orchestrator agent response body: $HTTP_BODY"
