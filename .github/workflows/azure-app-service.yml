@@ -20,7 +20,7 @@ jobs:
           REPO_NAME=${{ github.repository }}
           COMMIT_ID=${{ github.event.pull_request.head.sha }}
           echo "Triggering orchestrator agent for repo: $REPO_NAME, commit: $COMMIT_ID"
-          RESPONSE=$(curl -s -w '\n%{{http_code}}' -X POST "$AZURE_FUNCTION_URL" \
+          RESPONSE=$(curl -s -w '\n%{http_code}' -X POST "$AZURE_FUNCTION_URL" \
             -H "Content-Type: application/json" \
             -d '{"repository": "'$REPO_NAME'", "commit": "'$COMMIT_ID'"}')
           HTTP_BODY=$(echo "$RESPONSE" | head -n -1)
